@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Perfekte Uhrzeit</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600;700&display=swap');
+
+:root{
+  --bg: #0B1120;
+  --panel: #141B2D;
+  --panel-2: #1B2438;
+  --text: #E8ECF4;
+  --muted: #6B7690;
+  --gold: #E8B04B;
+  --teal: #4FC3B0;
+  --line: #232D45;
+}
+
+*{ box-sizing: border-box; }
+html,body{ height:100%; }
+body{
+  margin:0;
+  background: radial-gradient(ellipse at 50% -10%, #16203A 0%, var(--bg) 55%);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding: 24px;
+}
+
+.screen{
+  width:100%;
+  max-width: 560px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap: 28px;
+}
+
+.eyebrow{
+  font-family:'Space Mono', monospace;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* ---------- Landing ---------- */
+.landing-card{
+  width:100%;
+  background: linear-gradient(180deg, var(--panel), var(--panel-2));
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 40px 32px;
+  text-align:center;
+  box-shadow: 0 30px 60px -30px rgba(0,0,0,0.6);
+}
+h1{
+  font-family:'Space Mono', monospace;
+  font-size: 28px;
+  margin: 0 0 8px;
+  letter-spacing: -0.01em;
+}
+.sub{
+  color: var(--muted);
+  font-size: 15px;
+  margin: 0 0 28px;
+  line-height:1.5;
+}
+.demo-times{
+  font-family:'Space Mono', monospace;
+  color: var(--gold);
+  font-weight:700;
+}
+.name-grid{
+  display:grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+.name-btn{
+  font-family:'Inter', sans-serif;
+  font-weight:600;
+  font-size: 15px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 16px 12px;
+  background: #0E1526;
+  color: var(--text);
+  cursor:pointer;
+  transition: border-color .15s ease, transform .15s ease, background .15s ease;
+}
+.name-btn:hover{
+  border-color: var(--gold);
+  transform: translateY(-1px);
+  background: #131C30;
+}
+.name-btn.test-btn{
+  grid-column: 1 / -1;
+  border-style: dashed;
+  color: var(--muted);
+}
+.name-btn.test-btn:hover{
+  color: var(--gold);
+}
+
+/* ---------- Game ---------- */
+button{
+  font-family:'Inter', sans-serif;
+  font-weight:600;
+  font-size: 15px;
+  border:none;
+  border-radius: 12px;
+  padding: 14px 22px;
+  cursor:pointer;
+  transition: transform .15s ease, box-shadow .15s ease, opacity .15s ease;
+}
+button:active{ transform: scale(0.97); }
+
+.game-wrap{ width:100%; display:flex; flex-direction:column; align-items:center; gap:22px; }
+.player-tag{
+  font-family:'Space Mono', monospace;
+  font-size: 13px;
+  color: var(--muted);
+}
+.player-tag b{ color: var(--text); }
+
+.clock-panel{
+  width:100%;
+  background: var(--panel);
+  border:1px solid var(--line);
+  border-radius: 24px;
+  padding: 36px 24px 28px;
+  text-align:center;
+  position:relative;
+  overflow:hidden;
+  transition: box-shadow .3s ease, border-color .3s ease;
+}
+.clock-panel.perfect{
+  border-color: var(--gold);
+  box-shadow: 0 0 0 1px rgba(232,176,75,0.4), 0 0 60px -10px rgba(232,176,75,0.45);
+}
+.clock{
+  font-family:'Space Mono', monospace;
+  font-size: 64px;
+  font-weight:700;
+  letter-spacing: 0.02em;
+  color: var(--text);
+  transition: color .3s ease, text-shadow .3s ease;
+}
+.clock .sec{ font-size: 30px; color: var(--muted); }
+.clock-panel.perfect .clock{
+  color: var(--gold);
+  text-shadow: 0 0 30px rgba(232,176,75,0.55);
+}
+.status-line{
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--muted);
+  min-height: 18px;
+  font-family: 'Space Mono', monospace;
+}
+.clock-panel.perfect .status-line{ color: var(--gold); }
+
+.press-btn{
+  margin-top: 22px;
+  width: 100%;
+  max-width: 260px;
+  padding: 16px 20px;
+  font-size: 16px;
+  border-radius: 14px;
+  background: var(--line);
+  color: var(--muted);
+  cursor: not-allowed;
+}
+.press-btn.active{
+  background: var(--gold);
+  color: #1A1305;
+  cursor:pointer;
+  animation: pulse 1.4s ease-in-out infinite;
+}
+.press-btn.done{
+  background: var(--teal);
+  color: #06211D;
+  cursor: default;
+  animation: none;
+}
+@keyframes pulse{
+  0%,100%{ box-shadow: 0 0 0 0 rgba(232,176,75,0.5); }
+  50%{ box-shadow: 0 0 0 12px rgba(232,176,75,0); }
+}
+
+/* ---------- Tables ---------- */
+.panel-title{
+  width:100%;
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  margin-bottom: 4px;
+}
+.panel-title h2{
+  font-family:'Space Mono', monospace;
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0;
+}
+table{
+  width:100%;
+  border-collapse: collapse;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  overflow:hidden;
+  font-size: 13.5px;
+}
+th, td{
+  padding: 10px 12px;
+  text-align:left;
+  border-bottom: 1px solid var(--line);
+}
+th{
+  font-family:'Space Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: var(--panel-2);
+}
+tr:last-child td{ border-bottom:none; }
+td.num{ font-family:'Space Mono', monospace; }
+.empty-row td{ color: var(--muted); text-align:center; padding: 18px; }
+.name-you{ color: var(--gold); font-weight:600; }
+
+.footnote{
+  color: var(--muted);
+  font-size: 12px;
+  text-align:center;
+  line-height:1.5;
+}
+
+/* ---------- Debug / Testmodus ---------- */
+.debug-toggle{
+  background:none;
+  border:none;
+  color: var(--muted);
+  font-size: 12px;
+  font-family:'Space Mono', monospace;
+  text-decoration: underline;
+  padding: 4px;
+  cursor:pointer;
+}
+.debug-panel{
+  width:100%;
+  background: var(--panel-2);
+  border: 1px dashed var(--line);
+  border-radius: 14px;
+  padding: 14px 16px;
+  display:flex;
+  flex-direction:column;
+  gap: 10px;
+}
+.debug-row{
+  display:flex;
+  gap: 8px;
+  align-items:center;
+  flex-wrap: wrap;
+}
+.debug-row label{
+  font-size: 12px;
+  color: var(--muted);
+  font-family:'Space Mono', monospace;
+}
+input#timeOverride{
+  background: #0E1526;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--text);
+  font-family:'Space Mono', monospace;
+  padding: 8px 10px;
+  font-size: 14px;
+}
+.btn-small{
+  font-size: 12px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--line);
+  color: var(--text);
+  cursor:pointer;
+}
+.btn-small:hover{ background: #2A3452; }
+.btn-small.gold{ background: var(--gold); color: #1A1305; }
+.debug-note{
+  font-size: 11px;
+  color: var(--muted);
+}
+</style>
+</head>
+<body>
+
+<div id="app" class="screen"></div>
+
+<script>
+/* ============================================================
+   KONFIGURATION – hier anpassen
+   ============================================================ */
+
+// Namen, die auf der Startseite zur Auswahl stehen.
+const NAMES = ["Ben", "Max", "Luca", "Niklas", "Keno"];
+
+// Testmodus: auf false setzen, um die Testfunktion komplett zu deaktivieren
+// (dann verschwindet auch der Test-Name-Button von der Startseite).
+const TEST_MODE_ENABLED = false;
+
+// Name, mit dem man sich einloggen muss, um Zugriff auf den Testmodus
+// (Uhrzeit manuell setzen) zu bekommen. Erscheint nur, wenn TEST_MODE_ENABLED = true ist.
+const TEST_NAME = "Test";
+
+// Basis-URL deines eigenen Servers/API.
+// Erwartete Endpunkte:
+//   GET  {API_BASE}/entries       -> liefert JSON-Array aller Einträge
+//   POST {API_BASE}/entries       -> nimmt einen einzelnen Eintrag entgegen (JSON-Body) und speichert ihn
+// Wenn diese HTML-Datei vom selben Server ausgeliefert wird wie die API
+// (siehe server-beispiel.js), reicht der relative Pfad "/api" völlig aus.
+const API_BASE = "/api";
+
+/* ============================================================ */
+
+let state = {
+  screen: 'landing',
+  name: '',
+  now: new Date(),
+  entries: [],
+  loaded: false,
+  debugOpen: false,
+  overrideBase: null,      // Date-Objekt: gesetzte Testzeit
+  overrideSetAtReal: null, // echter Zeitpunkt (ms), als die Testzeit gesetzt wurde
+};
+
+const app = document.getElementById('app');
+
+function isPerfect(d){
+  return d.getHours() === d.getMinutes();
+}
+
+function pad(n){ return n.toString().padStart(2,'0'); }
+
+function timeLabel(d){
+  return pad(d.getHours()) + ':' + pad(d.getMinutes());
+}
+
+function minuteKey(d){
+  return d.getFullYear()+'-'+d.getMonth()+'-'+d.getDate()+'T'+d.getHours()+':'+d.getMinutes();
+}
+
+function hasEntryForMinute(name, d){
+  const key = minuteKey(d);
+  return state.entries.some(e => e.name === name && minuteKey(new Date(e.ts)) === key);
+}
+
+function currentDate(){
+  if(state.overrideBase && state.overrideSetAtReal){
+    const elapsed = Date.now() - state.overrideSetAtReal;
+    return new Date(state.overrideBase.getTime() + elapsed);
+  }
+  return new Date();
+}
+
+function nextPerfectDate(from){
+  const d = new Date(from.getTime());
+  d.setSeconds(0,0);
+  for(let i=0;i<24*60;i++){
+    d.setMinutes(d.getMinutes()+1);
+    if(d.getHours() === d.getMinutes()) return d;
+  }
+  return from;
+}
+
+function calcPoints(d){
+  const hour = d.getHours();
+  // Schwierigkeit: 12/13 Uhr (mittags, leicht wach zu sein) = am einfachsten -> wenig Bonus.
+  // Nachtstunden wie 2 Uhr (schwer, man schläft normalerweise) = am schwersten -> viel Bonus.
+  const diffFromNoon = Math.abs(hour - 12);
+  const circularDistance = Math.min(diffFromNoon, 24 - diffFromNoon); // 0 (Mittag) .. 12 (Mitternacht)
+  const bonus = circularDistance * 15; // 0 .. 180
+  const points = 100 + bonus;
+  return { bonus, points };
+}
+
+async function loadEntries(){
+  try{
+    const res = await fetch(`${API_BASE}/entries`);
+    state.entries = await res.json();
+  }catch(e){
+    console.error('Konnte Einträge nicht laden:', e);
+    if(!state.entries) state.entries = [];
+  }
+  state.loaded = true;
+  render();
+}
+
+async function saveEntry(entry){
+  try{
+    await fetch(`${API_BASE}/entries`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(entry),
+    });
+  }catch(e){
+    console.error('Konnte Eintrag nicht speichern:', e);
+  }
+}
+
+function totalFor(name){
+  return state.entries
+    .filter(e => e.name === name)
+    .reduce((sum, e) => sum + e.points, 0);
+}
+
+function selectName(name){
+  state.name = name;
+  state.screen = 'game';
+  render();
+}
+
+async function handlePress(){
+  const d = currentDate();
+  if(!isPerfect(d)) return;
+  if(hasEntryForMinute(state.name, d)) return;
+
+  const { bonus, points } = calcPoints(d);
+  const entry = {
+    name: state.name,
+    timeLabel: timeLabel(d),
+    bonus,
+    points,
+    ts: d.getTime(),
+  };
+  state.entries.push(entry);
+  render();
+  await saveEntry(entry);
+}
+
+function renderLanding(){
+  app.innerHTML = `
+    <div class="eyebrow">Perfekte Uhrzeit</div>
+    <div class="landing-card">
+      <h1>Knock Knock Konck</h1>
+      <p class="sub">
+        Leichte Zeiten wie <span class="demo-times">12:12</span> oder
+        <span class="demo-times">13:13</span> bringen wenig Bonus,
+        schwere Zeiten mitten in der Nacht wie
+        <span class="demo-times">02:02</span> bringen deutlich mehr.
+      </p>
+      <div class="name-grid">
+        ${NAMES.map(n => `<button class="name-btn" data-name="${escapeHtml(n)}">${escapeHtml(n)}</button>`).join('')}
+        ${TEST_MODE_ENABLED ? `<button class="name-btn test-btn" data-name="${escapeHtml(TEST_NAME)}">🔧 ${escapeHtml(TEST_NAME)}</button>` : ``}
+      </div>
+    </div>
+  `;
+  document.querySelectorAll('.name-btn').forEach(btn => {
+    btn.addEventListener('click', () => selectName(btn.dataset.name));
+  });
+}
+
+function renderGame(){
+  const d = currentDate();
+  const perfect = isPerfect(d);
+  const alreadyClickedThisMinute = hasEntryForMinute(state.name, d);
+  const isTestUser = TEST_MODE_ENABLED && state.name === TEST_NAME;
+
+  const myTotal = totalFor(state.name);
+
+  const visibleEntries = state.entries.filter(e => e.name !== TEST_NAME);
+
+  const rows = visibleEntries
+    .slice()
+    .sort((a,b) => b.ts - a.ts)
+    .slice(0, 12)
+    .map(e => {
+      const total = visibleEntries
+        .filter(x => x.name === e.name && x.ts <= e.ts)
+        .reduce((s,x) => s + x.points, 0);
+      const nameCls = e.name === state.name ? 'name-you' : '';
+      return `<tr>
+        <td class="${nameCls}">${escapeHtml(e.name)}</td>
+        <td class="num">${e.timeLabel}</td>
+        <td class="num">+${e.bonus}</td>
+        <td class="num">${total}</td>
+      </tr>`;
+    }).join('');
+
+  const totalsByName = {};
+  visibleEntries.forEach(e => {
+    totalsByName[e.name] = (totalsByName[e.name] || 0) + e.points;
+  });
+  const ranking = Object.entries(totalsByName)
+    .sort((a,b) => b[1] - a[1]);
+
+  const rankingRows = ranking.map(([name, total], i) => {
+    const nameCls = name === state.name ? 'name-you' : '';
+    return `<tr>
+      <td class="num">${i+1}</td>
+      <td class="${nameCls}">${escapeHtml(name)}</td>
+      <td class="num">${total}</td>
+    </tr>`;
+  }).join('');
+
+  app.innerHTML = `
+    <div class="eyebrow">Perfekte Uhrzeit</div>
+    <div class="game-wrap">
+      <div class="player-tag">Angemeldet als <b>${escapeHtml(state.name)}</b> &middot; Gesamt: <b>${myTotal}</b> Punkte</div>
+
+      <div class="clock-panel ${perfect ? 'perfect' : ''}">
+        <div class="clock">${pad(d.getHours())}:${pad(d.getMinutes())}<span class="sec">:${pad(d.getSeconds())}</span></div>
+        <div class="status-line">${perfect ? 'Klopfen!' : 'Warte auf die nächste perfekte Minute'}</div>
+        <button id="pressBtn" class="press-btn ${perfect && !alreadyClickedThisMinute ? 'active' : ''} ${perfect && alreadyClickedThisMinute ? 'done' : ''}" ${(!perfect || alreadyClickedThisMinute) ? 'disabled' : ''}>
+          ${perfect && alreadyClickedThisMinute ? 'Erfasst ✓' : 'Klopfen'}
+        </button>
+      </div>
+
+      <div class="panel-title"><h2>Rangliste</h2></div>
+      <table>
+        <thead><tr><th>Platz</th><th>Name</th><th>Punkte</th></tr></thead>
+        <tbody>
+          ${rankingRows || `<tr class="empty-row"><td colspan="3">Noch keine Punkte vergeben.</td></tr>`}
+        </tbody>
+      </table>
+
+      <div class="panel-title"><h2>Verlauf</h2></div>
+      <table>
+        <thead><tr><th>Name</th><th>Uhrzeit</th><th>Bonus</th><th>Punkte</th></tr></thead>
+        <tbody>
+          ${rows || `<tr class="empty-row"><td colspan="4">Noch keine Treffer. Warte auf 00:00, 01:01, 02:02 &hellip;</td></tr>`}
+        </tbody>
+      </table>
+      <div class="footnote">Die Bestenliste wird auf deinem Server gespeichert &mdash; alle, die diese Seite öffnen, sehen dieselben Einträge.</div>
+
+      ${isTestUser ? `
+        <button class="debug-toggle" id="debugToggle">${state.debugOpen ? '🔧 Testmodus ausblenden' : '🔧 Testmodus (Uhrzeit ändern)'}</button>
+        ${state.debugOpen ? `
+          <div class="debug-panel">
+            <div class="debug-row">
+              <label for="timeOverride">Uhrzeit setzen</label>
+              <input type="time" id="timeOverride" value="${pad(d.getHours())}:${pad(d.getMinutes())}" />
+              <button class="btn-small" id="applyTimeBtn">Setzen</button>
+              <button class="btn-small gold" id="nextPerfectBtn">Nächste perfekte Zeit</button>
+              ${state.overrideBase ? `<button class="btn-small" id="resetTimeBtn">Echte Zeit</button>` : ``}
+            </div>
+            <div class="debug-note">
+              ${state.overrideBase
+                ? 'Testzeit aktiv &mdash; läuft ab jetzt normal weiter.'
+                : 'Es läuft die echte Uhrzeit.'}
+            </div>
+          </div>
+        ` : ``}
+      ` : ``}
+    </div>
+  `;
+
+  const btn = document.getElementById('pressBtn');
+  if(btn) btn.addEventListener('click', handlePress);
+
+  const debugToggle = document.getElementById('debugToggle');
+  if(debugToggle) debugToggle.addEventListener('click', () => {
+    state.debugOpen = !state.debugOpen;
+    render();
+  });
+
+  const applyTimeBtn = document.getElementById('applyTimeBtn');
+  if(applyTimeBtn) applyTimeBtn.addEventListener('click', () => {
+    const val = document.getElementById('timeOverride').value; // "HH:MM"
+    if(!val) return;
+    const [hh, mm] = val.split(':').map(Number);
+    const base = new Date();
+    base.setHours(hh, mm, 0, 0);
+    state.overrideBase = base;
+    state.overrideSetAtReal = Date.now();
+    state.now = currentDate();
+    render();
+  });
+
+  const nextPerfectBtn = document.getElementById('nextPerfectBtn');
+  if(nextPerfectBtn) nextPerfectBtn.addEventListener('click', () => {
+    const next = nextPerfectDate(currentDate());
+    state.overrideBase = next;
+    state.overrideSetAtReal = Date.now();
+    state.now = currentDate();
+    render();
+  });
+
+  const resetTimeBtn = document.getElementById('resetTimeBtn');
+  if(resetTimeBtn) resetTimeBtn.addEventListener('click', () => {
+    state.overrideBase = null;
+    state.overrideSetAtReal = null;
+    state.now = currentDate();
+    render();
+  });
+}
+
+function escapeHtml(str){
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function render(){
+  if(state.screen === 'landing'){
+    renderLanding();
+  } else {
+    renderGame();
+  }
+}
+
+// Uhr jede Sekunde aktualisieren
+setInterval(() => {
+  state.now = currentDate();
+  if(state.screen === 'game') render();
+}, 1000);
+
+// Einträge regelmäßig vom Server nachladen, damit die Liste auch
+// Klicks anderer Personen zeigt (alle 10 Sekunden)
+setInterval(() => {
+  if(state.loaded) loadEntries();
+}, 10000);
+
+loadEntries();
+render();
+</script>
+</body>
+</html>
