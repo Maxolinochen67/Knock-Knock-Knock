@@ -27,6 +27,11 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const DATA_FILE = path.join(__dirname, 'entries.json');
 
+// Geheimschlüssel für die Admin-Funktionen (Löschen). Auf Render unter
+// "Environment" eine Variable ADMIN_KEY setzen und hier NICHT im Code
+// dein echtes Passwort eintragen, wenn das Repo öffentlich ist.
+const ADMIN_KEY = process.env.ADMIN_KEY || 'aendere-mich';
+
 app.use(cors());
 app.use(express.json());
 
@@ -61,6 +66,38 @@ app.post('/api/entries', (req, res) => {
   entries.push({ name, timeLabel, bonus, points, ts });
   writeEntries(entries);
   res.status(201).json({ ok: true });
+});
+
+// ---------- Admin: Einträge ansehen & löschen ----------
+// Alle Einträge MIT Index anzeigen (Index brauchst du zum gezielten Löschen).
+// Aufruf im Browser: https://DEINE-APP/api/admin/list?key=DEIN_SCHLUESSEL
+app.get('/api/admin/list', (req, res) => {
+  if(req.query.key !== ADMIN_KEY) return res.status(403).json({ error: 'Falscher Schlüssel' });
+  const entries = readEntries();
+  const withIndex = entries.map((e, i) => ({ index: i, ...e }));
+  res.json(withIndex);
+});
+
+// Einen einzelnen Eintrag per Index löschen.
+// Aufruf im Browser: https://DEINE-APP/api/admin/delete?index=3&key=DEIN_SCHLUESSEL
+app.get('/api/admin/delete', (req, res) => {
+  if(req.query.key !== ADMIN_KEY) return res.status(403).json({ error: 'Falscher Schlüssel' });
+  const index = parseInt(req.query.index, 10);
+  const entries = readEntries();
+  if(isNaN(index) || index < 0 || index >= entries.length){
+    return res.status(400).json({ error: 'Ungültiger Index' });
+  }
+  const removed = entries.splice(index, 1);
+  writeEntries(entries);
+  res.json({ removed, remaining: entries.length });
+});
+
+// ALLE Einträge löschen (kompletter Reset). Vorsicht, nicht rückgängig zu machen!
+// Aufruf im Browser: https://DEINE-APP/api/admin/clear-all?key=DEIN_SCHLUESSEL
+app.get('/api/admin/clear-all', (req, res) => {
+  if(req.query.key !== ADMIN_KEY) return res.status(403).json({ error: 'Falscher Schlüssel' });
+  writeEntries([]);
+  res.json({ ok: true });
 });
 
 app.listen(PORT, () => {
